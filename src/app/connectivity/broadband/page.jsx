@@ -1,6 +1,8 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ServiceHero from "@/components/services/ServiceHero";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Wifi } from "lucide-react";
 
 const benefits = [
   {
@@ -25,7 +27,7 @@ const benefits = [
   },
 ];
 
-export default function BusinessBroadbandPage() {
+export default function BroadbandPage() {
   return (
     <>
       <Navbar />
@@ -33,10 +35,54 @@ export default function BusinessBroadbandPage() {
       <main>
         <ServiceHero
           badge="Business Broadband"
-          title="Fast, Reliable"
-          highlight="Business Broadband"
-          description="Keep your employees, customers and systems connected with broadband solutions designed for modern businesses."
+          title="Reliable Connectivity"
+          highlight="For Your Business"
+          description="Find reliable connectivity solutions designed around your team's speed and performance requirements."
         />
+
+        <section className="bg-white py-20">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="grid gap-6 md:grid-cols-3">
+              {[
+                "Explore business broadband options",
+                "Compare solutions around your requirements",
+                "Understand available connectivity choices",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-3xl border border-slate-200 p-8"
+                >
+                  <CheckCircle2 className="h-8 w-8 text-blue-600" />
+
+                  <h2 className="mt-5 text-xl font-bold text-slate-900">
+                    {item}
+                  </h2>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-14 rounded-[2rem] bg-slate-950 p-10 text-white md:p-14">
+              <Wifi className="h-10 w-10 text-blue-400" />
+
+              <h2 className="mt-6 text-3xl font-bold md:text-4xl">
+                Find a Connectivity Solution
+              </h2>
+
+              <p className="mt-4 max-w-2xl leading-8 text-slate-300">
+                Tell us about your business and explore broadband options
+                suitable for your requirements.
+              </p>
+
+              <Link
+                href="/quote"
+                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-4 font-semibold hover:bg-blue-700"
+              >
+                Get My Broadband Quote
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
+          </div>
+        </section>
 
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6">
@@ -69,25 +115,33 @@ export default function BusinessBroadbandPage() {
                 </a>
               </div>
 
-              <div className="rounded-3xl bg-slate-900 p-8 md:p-10">
-                <div className="text-6xl">📶</div>
+              <div className="overflow-hidden rounded-3xl bg-slate-900">
+                <img
+                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85"
+                  alt="Business networking and broadband connectivity"
+                  className="h-80 w-full object-cover"
+                />
 
-                <h3 className="mt-8 text-2xl font-bold text-white">
-                  Business connectivity made simple
-                </h3>
+                <div className="p-8 md:p-10">
+                  <div className="text-6xl">📶</div>
 
-                <p className="mt-4 text-slate-300 leading-7">
-                  Find an internet solution that matches the way your business
-                  actually works.
-                </p>
+                  <h3 className="mt-8 text-2xl font-bold text-white">
+                    Business connectivity made simple
+                  </h3>
 
-                <div className="mt-8 h-2 rounded-full bg-slate-700 overflow-hidden">
-                  <div className="h-full w-4/5 bg-blue-500 rounded-full" />
+                  <p className="mt-4 text-slate-300 leading-7">
+                    Find an internet solution that matches the way your
+                    business actually works.
+                  </p>
+
+                  <div className="mt-8 h-2 rounded-full bg-slate-700 overflow-hidden">
+                    <div className="h-full w-4/5 bg-blue-500 rounded-full" />
+                  </div>
+
+                  <p className="mt-3 text-sm text-slate-400">
+                    Built around your requirements
+                  </p>
                 </div>
-
-                <p className="mt-3 text-sm text-slate-400">
-                  Built around your requirements
-                </p>
               </div>
             </div>
           </div>
@@ -129,6 +183,81 @@ export default function BusinessBroadbandPage() {
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Link
+                href="/connectivity/broadband"
+                className="group overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-sm transition hover:-translate-y-2 hover:shadow-xl"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85"
+                  alt="Modern business internet and digital connectivity"
+                  className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+
+                <div className="p-8">
+                  <Wifi className="h-10 w-10 text-blue-600" />
+
+                  <h2 className="mt-6 text-2xl font-bold text-slate-900">
+                    Business Broadband
+                  </h2>
+
+                  <p className="mt-4 leading-7 text-slate-600">
+                    Explore reliable broadband options designed around your
+                    team's speed and performance requirements.
+                  </p>
+
+                  <span className="mt-7 inline-flex items-center gap-2 font-semibold text-blue-600">
+                    Explore Broadband
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
+                </div>
+              </Link>
+
+              <div className="overflow-hidden rounded-3xl bg-slate-950 text-white">
+                <img
+                  src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1200&q=85"
+                  alt="Business team using technology and online communication"
+                  className="h-64 w-full object-cover"
+                />
+
+                <div className="p-8">
+                  <h2 className="text-2xl font-bold">
+                    Connected teams. Productive businesses.
+                  </h2>
+
+                  <p className="mt-4 leading-7 text-slate-300">
+                    Reliable broadband helps teams stay connected through
+                    video calls, cloud applications, browsing and everyday
+                    business activities.
+                  </p>
+
+                  <div className="mt-7 grid sm:grid-cols-2 gap-4">
+                    {[
+                      "Reliable connectivity",
+                      "Business-focused solutions",
+                      "Flexible packages",
+                      "Support for growing teams",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-3 rounded-2xl border border-slate-700 p-4"
+                      >
+                        <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+
+                        <span className="text-sm font-medium text-slate-300">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
