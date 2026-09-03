@@ -32,10 +32,13 @@ export default function QuoteForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
+
+    setError("");
+    setSubmitted(false);
   };
 
   const handleSubmit = async (e) => {
@@ -57,7 +60,9 @@ export default function QuoteForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to submit quote request.");
+        throw new Error(
+          data.message || "Failed to submit your quote request."
+        );
       }
 
       setSubmitted(true);
@@ -70,9 +75,9 @@ export default function QuoteForm() {
         service: "",
         message: "",
       });
-    } catch (error) {
+    } catch (err) {
       setError(
-        error.message || "Something went wrong. Please try again."
+        err.message || "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -92,7 +97,6 @@ export default function QuoteForm() {
       className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl md:p-8"
     >
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Name */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-800">
             Full Name
@@ -105,11 +109,11 @@ export default function QuoteForm() {
             onChange={handleChange}
             placeholder="Your full name"
             required
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           />
         </div>
 
-        {/* Business */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-800">
             Business Name
@@ -122,11 +126,11 @@ export default function QuoteForm() {
             onChange={handleChange}
             placeholder="Your business name"
             required
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           />
         </div>
 
-        {/* Email */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-800">
             Email Address
@@ -139,11 +143,11 @@ export default function QuoteForm() {
             onChange={handleChange}
             placeholder="you@example.com"
             required
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           />
         </div>
 
-        {/* Phone */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-800">
             Phone Number
@@ -156,11 +160,11 @@ export default function QuoteForm() {
             onChange={handleChange}
             placeholder="+44 0000 000000"
             required
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           />
         </div>
 
-        {/* Service */}
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-semibold text-slate-800">
             Service Required
@@ -171,7 +175,8 @@ export default function QuoteForm() {
             value={formData.service}
             onChange={handleChange}
             required
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            disabled={loading}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           >
             <option value="">Select a service</option>
 
@@ -183,7 +188,6 @@ export default function QuoteForm() {
           </select>
         </div>
 
-        {/* Message */}
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-semibold text-slate-800">
             Requirements
@@ -196,19 +200,18 @@ export default function QuoteForm() {
             placeholder="Tell us about your requirements..."
             rows={6}
             required
-            className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            disabled={loading}
+            className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
           />
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
-      {/* Success */}
       {submitted && (
         <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
           Your quote request has been submitted successfully. We will
@@ -216,12 +219,15 @@ export default function QuoteForm() {
         </div>
       )}
 
-      {/* Button */}
       <motion.button
         type="submit"
         disabled={loading}
-        whileHover={{ scale: loading ? 1 : 1.02 }}
-        whileTap={{ scale: loading ? 1 : 0.98 }}
+        whileHover={{
+          scale: loading ? 1 : 1.02,
+        }}
+        whileTap={{
+          scale: loading ? 1 : 0.98,
+        }}
         className="mt-6 w-full rounded-xl bg-blue-600 px-6 py-4 font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Submitting..." : "Request a Quote"}

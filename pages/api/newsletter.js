@@ -44,8 +44,7 @@ export default async function handler(req, res) {
 
     if (existingSubscriber) {
       if (
-        existingSubscriber.status ===
-        "subscribed"
+        existingSubscriber.status === "subscribed"
       ) {
         return res.status(409).json({
           success: false,

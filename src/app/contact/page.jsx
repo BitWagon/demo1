@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ContactForm from "@/components/forms/ContactForm";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -563,3 +564,4 @@ export default function ContactPage() {
     </>
   );
 }
+<ContactForm />

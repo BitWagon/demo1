@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
-export default function Newsletter() {
+export default function NewsletterForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -13,7 +16,10 @@ export default function Newsletter() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email) return;
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
 
     setLoading(true);
     setSubmitted(false);
@@ -26,7 +32,7 @@ export default function Newsletter() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email,
+          email: email.trim(),
         }),
       });
 
@@ -40,9 +46,9 @@ export default function Newsletter() {
 
       setSubmitted(true);
       setEmail("");
-    } catch (error) {
+    } catch (err) {
       setError(
-        error.message || "Something went wrong. Please try again."
+        err.message || "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -52,8 +58,14 @@ export default function Newsletter() {
   if (submitted) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{
+          opacity: 0,
+          y: 15,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
         className="flex items-center gap-3 rounded-xl border border-green-400/20 bg-green-400/10 p-4 text-sm text-green-300"
       >
         <CheckCircle2 className="h-5 w-5 shrink-0" />
@@ -83,7 +95,10 @@ export default function Newsletter() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError("");
+            }}
             placeholder="Enter your email"
             required
             disabled={loading}
@@ -93,13 +108,19 @@ export default function Newsletter() {
           <motion.button
             type="submit"
             disabled={loading}
-            whileHover={{ scale: loading ? 1 : 1.03 }}
-            whileTap={{ scale: loading ? 1 : 0.97 }}
+            whileHover={{
+              scale: loading ? 1 : 1.03,
+            }}
+            whileTap={{
+              scale: loading ? 1 : 0.97,
+            }}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Joining..." : "Subscribe"}
 
-            {!loading && <ArrowRight className="h-4 w-4" />}
+            {!loading && (
+              <ArrowRight className="h-4 w-4" />
+            )}
           </motion.button>
         </div>
 

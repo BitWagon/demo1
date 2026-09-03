@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import QuoteForm from "@/components/forms/QuoteForm";
 
 export default function QuotePage() {
   const [form, setForm] = useState({
@@ -711,3 +712,4 @@ export default function QuotePage() {
     </>
   );
 }
+<QuoteForm />

@@ -13,7 +13,10 @@ const NewsletterSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["subscribed", "unsubscribed"],
+      enum: [
+        "subscribed",
+        "unsubscribed",
+      ],
       default: "subscribed",
     },
   },

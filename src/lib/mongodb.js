@@ -27,7 +27,10 @@ export default async function connectDB() {
       .connect(MONGODB_URI, {
         bufferCommands: false,
       })
-      .then((mongooseInstance) => mongooseInstance);
+      .then(
+        (mongooseInstance) =>
+          mongooseInstance
+      );
   }
 
   try {

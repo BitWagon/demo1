@@ -1,16 +1,86 @@
-import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function QuoteSection() {
+  const [formData, setFormData] = useState({
+    business: "",
+    name: "",
+    email: "",
+    phone: "",
+    service: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    setSuccess("");
+    setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/quote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          message: "Quote request submitted from the homepage.",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to submit your quote request."
+        );
+      }
+
+      setSuccess(data.message);
+
+      setFormData({
+        business: "",
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+      });
+    } catch (err) {
+      setError(
+        err.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="px-6 py-24">
-
       <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-blue-600">
-
         <div className="grid gap-12 p-8 md:p-12 lg:grid-cols-2 lg:p-16">
-
           <div className="flex flex-col justify-center">
-
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-blue-100">
               Get Started
             </p>
@@ -25,7 +95,6 @@ export default function QuoteSection() {
             </p>
 
             <div className="mt-8 space-y-4">
-
               {[
                 "Quick enquiry",
                 "Simple process",
@@ -39,13 +108,10 @@ export default function QuoteSection() {
                   {item}
                 </div>
               ))}
-
             </div>
-
           </div>
 
           <div className="rounded-3xl bg-white p-8">
-
             <h3 className="text-2xl font-black text-slate-900">
               Request a free quote
             </h3>
@@ -54,66 +120,112 @@ export default function QuoteSection() {
               Start by telling us a little about your business.
             </p>
 
-            <form className="mt-7 space-y-4">
-
+            <form
+              onSubmit={handleSubmit}
+              className="mt-7 space-y-4"
+            >
               <input
                 type="text"
+                name="business"
+                value={formData.business}
+                onChange={handleChange}
                 placeholder="Business Name"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500"
+                required
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:bg-slate-50"
               />
 
               <input
                 type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Your Name"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500"
+                required
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:bg-slate-50"
               />
 
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Business Email"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500"
+                required
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:bg-slate-50"
               />
 
               <input
                 type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
                 placeholder="Phone Number"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500"
+                required
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 disabled:bg-slate-50"
               />
 
-              <select className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-600 outline-none focus:border-blue-500">
+              <select
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-600 outline-none focus:border-blue-500 disabled:bg-slate-50"
+              >
                 <option value="">
                   Select a service
                 </option>
-                <option value="energy">
+
+                <option value="Business Energy">
                   Business Energy
                 </option>
-                <option value="connectivity">
+
+                <option value="Connectivity">
                   Connectivity
                 </option>
-                <option value="water">
+
+                <option value="Business Water">
                   Business Water
                 </option>
-                <option value="card">
-                  Card Machine
+
+                <option value="Card Machines">
+                  Card Machines
                 </option>
               </select>
 
-              <Link
-                href="/quote"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-4 font-bold text-white transition hover:bg-slate-800"
+              {error && (
+                <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="rounded-xl bg-green-50 p-4 text-sm text-green-700">
+                  {success}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-4 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Continue
-                <ArrowRight size={18} />
-              </Link>
+                {loading
+                  ? "Submitting..."
+                  : "Request Free Quote"}
 
+                {!loading && (
+                  <ArrowRight size={18} />
+                )}
+              </button>
             </form>
-
           </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }
