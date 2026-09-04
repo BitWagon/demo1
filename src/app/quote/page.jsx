@@ -13,6 +13,7 @@ export default function QuotePage() {
     phone: "",
     service: "",
     message: "",
+    
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -706,10 +707,10 @@ export default function QuotePage() {
             </a>
           </div>
         </section>
+        <QuoteForm />
       </main>
 
       <Footer />
     </>
   );
 }
-<QuoteForm />
