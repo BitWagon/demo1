@@ -1,4 +1,5 @@
 import "./globals.css";
+import FloatingWhatsApp from "@/components/Floating/WhatsApp"; 
 
 export const metadata = {
   title: "Your Business Solutions",
@@ -10,6 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>{children}</body>
+      <FloatingWhatsApp />
     </html>
   );
 }

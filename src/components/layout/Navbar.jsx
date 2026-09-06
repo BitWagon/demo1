@@ -155,7 +155,7 @@ export default function Navbar() {
 
           {/* Phone */}
           <a
-            href="tel:+440000000000"
+            href="tel:+923336516071"
             className="flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-blue-600"
           >
             <Phone size={17} />
