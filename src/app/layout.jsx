@@ -10,8 +10,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
-      <FloatingWhatsApp />
+      <body>{children}
+        <FloatingWhatsApp />
+      </body>
+      
     </html>
   );
 }

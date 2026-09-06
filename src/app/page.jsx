@@ -550,6 +550,48 @@ export default function Home() {
           </div>
         </section>
 
+        {/* TRUSTED PROVIDERS - ADDED */}
+        <section className="overflow-hidden bg-white py-12">
+          <div className="mx-auto max-w-7xl px-6">
+            <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
+              Trusted Providers
+            </p>
+
+            <div className="relative mt-8 overflow-hidden">
+              <div className="flex w-max animate-supplier-right items-center gap-6">
+                {[
+                  "Worldpay",
+                  "Paynt",
+                  "Drax",
+                  "BT",
+                  "E.ON",
+                  "British Gas Lite",
+                  "Daisy Communications",
+                  "Greenolite",
+                  "Worldpay",
+                  "Paynt",
+                  "Drax",
+                  "BT",
+                  "E.ON",
+                  "British Gas Lite",
+                  "Daisy Communications",
+                  "Greenolite",
+                ].map((company, index) => (
+                  <div
+                    key={`${company}-${index}`}
+                    className="flex h-24 w-48 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 shadow-sm"
+                  >
+                    <span className="text-center text-lg font-bold tracking-tight text-slate-700">
+                      {company}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* END TRUSTED PROVIDERS - ADDED */}
+
         {/* WHY CHOOSE US */}
         <section className="bg-slate-50 py-20 md:py-24">
           <div className="mx-auto max-w-7xl px-6">

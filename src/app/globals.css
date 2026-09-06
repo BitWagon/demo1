@@ -36,3 +36,17 @@ body {
   background: #2563eb;
   border-radius: 20px;
 }
+
+@keyframes supplier-right {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-supplier-right {
+  animation: supplier-right 25s linear infinite;
+}
