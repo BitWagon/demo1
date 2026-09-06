@@ -1,36 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import QuoteForm from "@/components/forms/QuoteForm";
 
 export default function QuotePage() {
-  const [form, setForm] = useState({
-    name: "",
-    business: "",
-    email: "",
-    phone: "",
-    service: "",
-    message: "",
-    
-  });
-
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    setSubmitted(true);
-  };
-
   return (
     <>
       <Navbar />
@@ -55,12 +29,14 @@ export default function QuotePage() {
 
             <h1 className="mt-5 max-w-4xl text-4xl font-bold md:text-6xl">
               Tell Us What Your{" "}
-              <span className="text-blue-400">Business Needs</span>
+              <span className="text-blue-400">
+                Business Needs
+              </span>
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
-              Complete the form below and we'll review your requirements so
-              suitable options can be explored.
+              Complete the form below and we&apos;ll review your requirements
+              so suitable options can be explored.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -89,7 +65,7 @@ export default function QuotePage() {
                 </span>
 
                 <h2 className="mt-4 text-3xl font-bold text-slate-900 md:text-4xl">
-                  Let's find the right solution for your business.
+                  Let&apos;s find the right solution for your business.
                 </h2>
 
                 <p className="mt-5 text-lg leading-8 text-slate-600">
@@ -99,7 +75,7 @@ export default function QuotePage() {
                 </p>
 
                 <p className="mt-4 leading-8 text-slate-600">
-                  Whether you're reviewing business energy, connectivity,
+                  Whether you&apos;re reviewing business energy, connectivity,
                   water, waste management, finance, insurance or payment
                   solutions, you can use the form to tell us what you need.
                 </p>
@@ -112,7 +88,7 @@ export default function QuotePage() {
 
                     <p className="mt-2 text-sm leading-6 text-slate-600">
                       Provide some basic information about your business and
-                      what you're looking for.
+                      what you&apos;re looking for.
                     </p>
                   </div>
 
@@ -208,6 +184,7 @@ export default function QuotePage() {
         <section className="bg-slate-50 py-20">
           <div className="mx-auto max-w-7xl px-6">
             <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
+              
               {/* Left Information */}
               <div>
                 <span className="text-sm font-bold uppercase tracking-wider text-blue-600">
@@ -292,152 +269,11 @@ export default function QuotePage() {
                 </div>
               </div>
 
-              {/* Form */}
+              {/* REAL DATABASE-BACKED QUOTE FORM */}
               <div>
-                <form
-                  onSubmit={handleSubmit}
-                  className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm md:p-10"
-                >
-                  {submitted && (
-                    <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">
-                      Thanks! Your quote request has been submitted.
-                    </div>
-                  )}
-
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-slate-900">
-                      Request Your Free Quote
-                    </h2>
-
-                    <p className="mt-2 text-slate-600">
-                      Fill in your details below and tell us what your
-                      business needs.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Full Name
-                      </label>
-
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                        placeholder="Your name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Business Name
-                      </label>
-
-                      <input
-                        name="business"
-                        value={form.business}
-                        onChange={handleChange}
-                        required
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                        placeholder="Business name"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid gap-5 md:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Email
-                      </label>
-
-                      <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                        placeholder="you@example.com"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Phone
-                      </label>
-
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={form.phone}
-                        onChange={handleChange}
-                        required
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                        placeholder="Phone number"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Service
-                    </label>
-
-                    <select
-                      name="service"
-                      value={form.service}
-                      onChange={handleChange}
-                      required
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    >
-                      <option value="">Select a service</option>
-                      <option value="energy">Business Energy</option>
-                      <option value="electricity">
-                        Business Electricity
-                      </option>
-                      <option value="gas">Business Gas</option>
-                      <option value="broadband">
-                        Business Broadband
-                      </option>
-                      <option value="phone-line">
-                        Business Phone Line
-                      </option>
-                      <option value="water">Business Water</option>
-                      <option value="card-machine">Card Machine</option>
-                    </select>
-                  </div>
-
-                  <div className="mt-5">
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Tell us about your requirements
-                    </label>
-
-                    <textarea
-                      name="message"
-                      value={form.message}
-                      onChange={handleChange}
-                      rows={6}
-                      placeholder="Tell us what you need..."
-                      className="w-full resize-none rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="mt-6 w-full rounded-xl bg-blue-600 py-3.5 font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    Request Free Quote
-                  </button>
-
-                  <p className="mt-4 text-center text-xs leading-5 text-slate-500">
-                    By submitting this form, you are providing information
-                    about your business so your requirements can be reviewed.
-                  </p>
-                </form>
+                <QuoteForm />
               </div>
+
             </div>
           </div>
         </section>
@@ -483,12 +319,17 @@ export default function QuotePage() {
                     "Provide details about your current requirements",
                     "Consider options that fit your organisation",
                   ].map((item) => (
-                    <div key={item} className="flex items-start gap-3">
+                    <div
+                      key={item}
+                      className="flex items-start gap-3"
+                    >
                       <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
                         ✓
                       </span>
 
-                      <p className="text-slate-700">{item}</p>
+                      <p className="text-slate-700">
+                        {item}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -511,8 +352,8 @@ export default function QuotePage() {
 
               <p className="mt-5 leading-8 text-slate-600">
                 The more relevant information you provide, the easier it is to
-                understand what your business is looking for. You don't need
-                to have everything prepared before making an enquiry.
+                understand what your business is looking for. You don&apos;t
+                need to have everything prepared before making an enquiry.
               </p>
             </div>
 
@@ -644,7 +485,7 @@ export default function QuotePage() {
 
                 <p className="mt-5 leading-8 text-slate-300">
                   From small businesses and growing teams to established
-                  organisations, requirements can vary considerably. That's
+                  organisations, requirements can vary considerably. That&apos;s
                   why your enquiry can focus on the particular service and
                   priorities that matter to you.
                 </p>
@@ -660,9 +501,13 @@ export default function QuotePage() {
                       key={item}
                       className="rounded-2xl border border-slate-800 bg-slate-900 p-5"
                     >
-                      <div className="text-lg font-bold text-blue-400">✓</div>
+                      <div className="text-lg font-bold text-blue-400">
+                        ✓
+                      </div>
 
-                      <h3 className="mt-3 font-semibold">{item}</h3>
+                      <h3 className="mt-3 font-semibold">
+                        {item}
+                      </h3>
                     </div>
                   ))}
                 </div>
@@ -688,14 +533,15 @@ export default function QuotePage() {
 
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-blue-100">
               Complete the enquiry form above and tell us what your business
-              needs. We'll review the information provided so suitable options
-              can be explored.
+              needs. We&apos;ll review the information provided so suitable
+              options can be explored.
             </p>
 
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
+
                 window.scrollTo({
                   top: 0,
                   behavior: "smooth",
@@ -707,7 +553,6 @@ export default function QuotePage() {
             </a>
           </div>
         </section>
-        <QuoteForm />
       </main>
 
       <Footer />

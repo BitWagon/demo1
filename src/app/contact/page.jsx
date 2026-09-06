@@ -1,38 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ContactForm from "@/components/forms/ContactForm";
 
-
 export default function ContactPage() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
-
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    setSubmitted(true);
-
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 5000);
-  };
-
   return (
     <>
       <Navbar />
@@ -148,6 +120,8 @@ export default function ContactPage() {
         <section className="bg-slate-50 py-20">
           <div className="mx-auto max-w-7xl px-6">
             <div className="grid gap-10 lg:grid-cols-5">
+              
+              {/* Contact Information */}
               <div className="lg:col-span-2">
                 <span className="text-sm font-semibold uppercase tracking-wider text-blue-600">
                   Contact Information
@@ -189,7 +163,9 @@ export default function ContactPage() {
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm text-slate-500">Business Hours</p>
+                    <p className="text-sm text-slate-500">
+                      Business Hours
+                    </p>
 
                     <p className="mt-1 font-semibold text-slate-900">
                       Monday - Friday
@@ -211,105 +187,11 @@ export default function ContactPage() {
                 </div>
               </div>
 
+              {/* REAL DATABASE-BACKED CONTACT FORM */}
               <div className="lg:col-span-3">
-                <form
-                  onSubmit={handleSubmit}
-                  className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm md:p-10"
-                >
-                  {submitted && (
-                    <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-                      Thank you! Your message has been submitted successfully.
-                    </div>
-                  )}
-
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-slate-900 md:text-3xl">
-                      Send Us A Message
-                    </h2>
-
-                    <p className="mt-2 leading-7 text-slate-600">
-                      Tell us what you need and provide any details that may
-                      help us understand your enquiry.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Full Name
-                      </label>
-
-                      <input
-                        type="text"
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="Your name"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
-                        Email Address
-                      </label>
-
-                      <input
-                        type="email"
-                        name="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="you@example.com"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Phone Number
-                    </label>
-
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={form.phone}
-                      onChange={handleChange}
-                      placeholder="Your phone number"
-                      className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
-
-                  <div className="mt-5">
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
-                      Message
-                    </label>
-
-                    <textarea
-                      name="message"
-                      value={form.message}
-                      onChange={handleChange}
-                      required
-                      rows={6}
-                      placeholder="How can we help?"
-                      className="w-full resize-none rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="mt-6 w-full rounded-xl bg-blue-600 py-3.5 font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    Send Message
-                  </button>
-
-                  <p className="mt-4 text-center text-xs text-slate-500">
-                    By submitting this form, you agree to our privacy policy.
-                  </p>
-                </form>
+                <ContactForm />
               </div>
+
             </div>
           </div>
         </section>
@@ -391,8 +273,8 @@ export default function ContactPage() {
                 </h2>
 
                 <p className="mt-5 leading-8 text-slate-300">
-                  You don't need to know exactly what solution you need before
-                  contacting us. Start by explaining your question,
+                  You don&apos;t need to know exactly what solution you need
+                  before contacting us. Start by explaining your question,
                   requirements or current situation.
                 </p>
 
@@ -540,7 +422,7 @@ export default function ContactPage() {
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-blue-100">
               Send us a message and tell us what you need. Whether you have a
               general question or are exploring a specific business service,
-              we're ready to hear from you.
+              we&apos;re ready to hear from you.
             </p>
 
             <a
@@ -559,12 +441,9 @@ export default function ContactPage() {
             </a>
           </div>
         </section>
-        <ContactForm />
       </main>
 
       <Footer />
     </>
-    
   );
-  
 }

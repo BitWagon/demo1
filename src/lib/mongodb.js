@@ -4,7 +4,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error(
-    "Please define MONGODB_URI in your .env.local file"
+    "Please define MONGODB_URI in .env.local"
   );
 }
 
@@ -23,20 +23,22 @@ export default async function connectDB() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose
-      .connect(MONGODB_URI, {
-        bufferCommands: false,
-      })
-      .then(
-        (mongooseInstance) =>
-          mongooseInstance
-      );
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
+    });
   }
 
   try {
     cached.conn = await cached.promise;
   } catch (error) {
     cached.promise = null;
+
+    console.error(
+      "MongoDB connection failed:",
+      error
+    );
+
     throw error;
   }
 

@@ -28,23 +28,29 @@ export default async function handler(req, res) {
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
-        message: "Please complete all required fields.",
+        message:
+          "Please complete all required fields.",
       });
     }
 
     const cleanName = String(name).trim();
+
     const cleanEmail = String(email)
       .trim()
       .toLowerCase();
+
     const cleanPhone = phone
       ? String(phone).trim()
       : "";
-    const cleanMessage = String(message).trim();
+
+    const cleanMessage =
+      String(message).trim();
 
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid email address.",
+        message:
+          "Please enter a valid email address.",
       });
     }
 
@@ -54,21 +60,24 @@ export default async function handler(req, res) {
     ) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid phone number.",
+        message:
+          "Please enter a valid phone number.",
       });
     }
 
     if (cleanName.length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Please enter your name.",
+        message:
+          "Please enter your name.",
       });
     }
 
     if (cleanMessage.length < 5) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a longer message.",
+        message:
+          "Please provide a longer message.",
       });
     }
 
@@ -89,7 +98,10 @@ export default async function handler(req, res) {
       contactId: contact._id,
     });
   } catch (error) {
-    console.error("CONTACT API ERROR:", error);
+    console.error(
+      "CONTACT API ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,

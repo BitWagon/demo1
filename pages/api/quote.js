@@ -37,51 +37,66 @@ export default async function handler(req, res) {
     ) {
       return res.status(400).json({
         success: false,
-        message: "Please complete all required fields.",
+        message:
+          "Please complete all required fields.",
       });
     }
 
     const cleanName = String(name).trim();
-    const cleanBusiness = String(business).trim();
+
+    const cleanBusiness =
+      String(business).trim();
+
     const cleanEmail = String(email)
       .trim()
       .toLowerCase();
-    const cleanPhone = String(phone).trim();
-    const cleanService = String(service).trim();
-    const cleanMessage = String(message).trim();
+
+    const cleanPhone =
+      String(phone).trim();
+
+    const cleanService =
+      String(service).trim();
+
+    const cleanMessage =
+      String(message).trim();
 
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid email address.",
+        message:
+          "Please enter a valid email address.",
       });
     }
 
     if (!phoneRegex.test(cleanPhone)) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid phone number.",
+        message:
+          "Please enter a valid phone number.",
       });
     }
 
     if (cleanName.length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Please enter your full name.",
+        message:
+          "Please enter your full name.",
       });
     }
 
     if (cleanBusiness.length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Please enter your business name.",
+        message:
+          "Please enter your business name.",
       });
     }
 
     if (cleanService.length < 2) {
       return res.status(400).json({
         success: false,
-        message: "Please select a service.",
+        message:
+          "Please select a service.",
       });
     }
 
@@ -112,7 +127,10 @@ export default async function handler(req, res) {
       quoteId: quote._id,
     });
   } catch (error) {
-    console.error("QUOTE API ERROR:", error);
+    console.error(
+      "QUOTE API ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,

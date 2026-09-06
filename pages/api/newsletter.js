@@ -31,7 +31,8 @@ export default async function handler(req, res) {
     if (!emailRegex.test(cleanEmail)) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a valid email address.",
+        message:
+          "Please enter a valid email address.",
       });
     }
 
@@ -44,7 +45,8 @@ export default async function handler(req, res) {
 
     if (existingSubscriber) {
       if (
-        existingSubscriber.status === "subscribed"
+        existingSubscriber.status ===
+        "subscribed"
       ) {
         return res.status(409).json({
           success: false,
@@ -53,7 +55,8 @@ export default async function handler(req, res) {
         });
       }
 
-      existingSubscriber.status = "subscribed";
+      existingSubscriber.status =
+        "subscribed";
 
       await existingSubscriber.save();
 
@@ -64,15 +67,17 @@ export default async function handler(req, res) {
       });
     }
 
-    await Newsletter.create({
-      email: cleanEmail,
-      status: "subscribed",
-    });
+    const subscriber =
+      await Newsletter.create({
+        email: cleanEmail,
+        status: "subscribed",
+      });
 
     return res.status(201).json({
       success: true,
       message:
         "You have successfully subscribed to our newsletter.",
+      subscriberId: subscriber._id,
     });
   } catch (error) {
     console.error(

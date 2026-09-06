@@ -2,27 +2,18 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
 
 export default function NewsletterForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email.trim()) {
-      setError("Please enter your email address.");
-      return;
-    }
-
     setLoading(true);
-    setSubmitted(false);
+    setMessage("");
     setError("");
 
     try {
@@ -40,96 +31,88 @@ export default function NewsletterForm() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Unable to subscribe right now."
+          data.message ||
+            "Unable to subscribe right now."
         );
       }
 
-      setSubmitted(true);
+      setMessage(
+        data.message ||
+          "You have successfully subscribed to our newsletter."
+      );
+
       setEmail("");
-    } catch (err) {
+    } catch (error) {
       setError(
-        err.message || "Something went wrong. Please try again."
+        error.message ||
+          "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  if (submitted) {
-    return (
-      <motion.div
-        initial={{
-          opacity: 0,
-          y: 15,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
-        className="flex items-center gap-3 rounded-xl border border-green-400/20 bg-green-400/10 p-4 text-sm text-green-300"
-      >
-        <CheckCircle2 className="h-5 w-5 shrink-0" />
-
-        <span>
-          You're subscribed! Thank you for joining our newsletter.
-        </span>
-      </motion.div>
-    );
-  }
-
   return (
-    <div>
-      <div className="mb-4">
-        <h3 className="text-lg font-bold text-white">
-          Stay Updated
-        </h3>
+    <motion.form
+      onSubmit={handleSubmit}
+      className="w-full"
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+      whileInView={{
+        opacity: 1,
+        y: 0,
+      }}
+      viewport={{
+        once: true,
+        amount: 0.2,
+      }}
+      transition={{
+        duration: 0.5,
+      }}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setMessage("");
+            setError("");
+          }}
+          placeholder="Enter your email address"
+          required
+          disabled={loading}
+          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+        />
 
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          Subscribe to receive business updates, useful insights and
-          service news.
-        </p>
+        <motion.button
+          type="submit"
+          disabled={loading}
+          whileHover={{
+            scale: loading ? 1 : 1.02,
+          }}
+          whileTap={{
+            scale: loading ? 1 : 0.98,
+          }}
+          className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? "Subscribing..." : "Subscribe"}
+        </motion.button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError("");
-            }}
-            placeholder="Enter your email"
-            required
-            disabled={loading}
-            className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500 transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-60"
-          />
-
-          <motion.button
-            type="submit"
-            disabled={loading}
-            whileHover={{
-              scale: loading ? 1 : 1.03,
-            }}
-            whileTap={{
-              scale: loading ? 1 : 0.97,
-            }}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "Joining..." : "Subscribe"}
-
-            {!loading && (
-              <ArrowRight className="h-4 w-4" />
-            )}
-          </motion.button>
+      {error && (
+        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
         </div>
+      )}
 
-        {error && (
-          <p className="mt-3 text-sm text-red-400">
-            {error}
-          </p>
-        )}
-      </form>
-    </div>
+      {message && (
+        <div className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+          {message}
+        </div>
+      )}
+    </motion.form>
   );
 }
