@@ -552,44 +552,90 @@ export default function Home() {
 
         {/* TRUSTED PROVIDERS - ADDED */}
         <section className="overflow-hidden bg-white py-12">
-          <div className="mx-auto max-w-7xl px-6">
-            <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
-              Trusted Providers
-            </p>
+         <div className="mx-auto max-w-7xl px-6">
+         <p className="text-center text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
+           Trusted Providers
+         </p>
 
-            <div className="relative mt-8 overflow-hidden">
-              <div className="flex w-max animate-supplier-right items-center gap-6">
-                {[
-                  "Worldpay",
-                  "Paynt",
-                  "Drax",
-                  "BT",
-                  "E.ON",
-                  "British Gas Lite",
-                  "Daisy Communications",
-                  "Greenolite",
-                  "Worldpay",
-                  "Paynt",
-                  "Drax",
-                  "BT",
-                  "E.ON",
-                  "British Gas Lite",
-                  "Daisy Communications",
-                  "Greenolite",
-                ].map((company, index) => (
-                  <div
-                    key={`${company}-${index}`}
-                    className="flex h-24 w-48 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 shadow-sm"
-                  >
-                    <span className="text-center text-lg font-bold tracking-tight text-slate-700">
-                      {company}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+         <div className="relative mt-8 overflow-hidden">
+         <div className="flex w-max animate-supplier-right items-center gap-12">
+
+         {[
+          {
+            name: "Worldpay",
+            image: "/images/suppliers/worldpay.png",
+          },
+          {
+            name: "Paynt",
+            image: "/images/suppliers/paynt.png",
+          },
+          {
+            name: "Drax",
+            image: "/images/suppliers/drax.png",
+          },
+          {
+            name: "BT",
+            image: "/images/suppliers/bt.png",
+          },
+          {
+            name: "British Gas Lite",
+            image: "/images/suppliers/british-gas-lite.png",
+          },
+          {
+            name: "Daisy Communications",
+            image: "/images/suppliers/daisy-communications.png",
+          },
+          {
+            name: "Greenolite",
+            image: "/images/suppliers/greenolite.png",
+          },
+
+          // Duplicate logos for smooth infinite movement
+          {
+            name: "Worldpay",
+            image: "/images/suppliers/worldpay.png",
+          },
+          {
+            name: "Paynt",
+            image: "/images/suppliers/paynt.png",
+          },
+          {
+            name: "Drax",
+            image: "/images/suppliers/drax.png",
+          },
+          {
+            name: "BT",
+            image: "/images/suppliers/bt.png",
+          },
+          {
+            name: "British Gas Lite",
+            image: "/images/suppliers/british-gas-lite.png",
+          },
+          {
+            name: "Daisy Communications",
+            image: "/images/suppliers/daisy-communications.png",
+          },
+          {
+            name: "Greenolite",
+            image: "/images/suppliers/greenolite.png",
+          },
+          ].map((supplier, index) => (
+          <div
+            key={`${supplier.name}-${index}`}
+            className="flex h-24 w-48 shrink-0 items-center justify-center bg-white px-5"
+          >
+            <img
+              src={supplier.image}
+              alt={supplier.name}
+              className="max-h-14 w-auto max-w-[170px] object-contain"
+            />
           </div>
-        </section>
+        ))}
+
+             </div>
+          </div>
+        </div>
+       </section>
         {/* END TRUSTED PROVIDERS - ADDED */}
 
         {/* WHY CHOOSE US */}
