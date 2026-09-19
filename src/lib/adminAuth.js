@@ -1,221 +1,91 @@
-const COOKIE_NAME = "brand_admin_session";
+import jwt from "jsonwebtoken";
 
-const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const ADMIN_SESSION_COOKIE = "brand_admin_session";
 
-/*
- * Convert a string to Base64URL.
- */
-function base64UrlEncode(value) {
-  const bytes = new TextEncoder().encode(value);
-
-  let binary = "";
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
-
-/*
- * Convert Base64URL back to a string.
- */
-function base64UrlDecode(value) {
-  const base64 = value
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
-
-  const padded =
-    base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-
-  const binary = atob(padded);
-
-  return new TextDecoder().decode(
-    Uint8Array.from(
-      binary,
-      (char) => char.charCodeAt(0)
-    )
-  );
-}
-
-/*
- * Get the signing key using the Web Crypto API.
- *
- * IMPORTANT:
- * We use crypto.subtle instead of Node.js crypto
- * because middleware runs in the Edge runtime.
- */
-async function getSigningKey() {
+const getAdminSecret = () => {
   const secret = process.env.ADMIN_SESSION_SECRET;
 
   if (!secret) {
     throw new Error(
-      "ADMIN_SESSION_SECRET is missing from .env.local"
+      "ADMIN_SESSION_SECRET is not defined in .env.local."
     );
   }
 
-  return crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
+  return secret;
+};
+
+export function createAdminToken() {
+  const secret = getAdminSecret();
+
+  return jwt.sign(
     {
-      name: "HMAC",
-      hash: "SHA-256",
+      role: "admin",
     },
-    false,
-    ["sign", "verify"]
+    secret,
+    {
+      expiresIn: "7d",
+    }
   );
 }
 
-/*
- * Create a signature for the session payload.
- */
-async function createSignature(payload) {
-  const key = await getSigningKey();
-
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(payload)
-  );
-
-  const bytes = new Uint8Array(signature);
-
-  let binary = "";
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
+export function verifyAdminToken(token) {
+  if (!token) {
+    return null;
   }
 
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
-
-/*
- * Verify the session signature.
- */
-async function verifySignature(payload, signature) {
   try {
-    const key = await getSigningKey();
+    const secret = getAdminSecret();
 
-    const base64 = signature
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-
-    const padded =
-      base64 + "=".repeat((4 - (base64.length % 4)) % 4);
-
-    const binary = atob(padded);
-
-    const signatureBytes = Uint8Array.from(
-      binary,
-      (char) => char.charCodeAt(0)
-    );
-
-    return await crypto.subtle.verify(
-      "HMAC",
-      key,
-      signatureBytes,
-      new TextEncoder().encode(payload)
-    );
+    return jwt.verify(token, secret);
   } catch (error) {
-    console.error(
-      "Signature verification failed:",
-      error
-    );
+    console.error("Admin token verification failed:", error.message);
 
-    return false;
+    return null;
   }
 }
 
-/*
- * Create a new admin session.
- */
-export async function createAdminSession() {
-  const expiresAt =
-    Date.now() + SESSION_DURATION;
-
-  const payload = JSON.stringify({
-    role: "admin",
-    exp: expiresAt,
-  });
-
-  const encodedPayload =
-    base64UrlEncode(payload);
-
-  const signature =
-    await createSignature(encodedPayload);
-
-  return `${encodedPayload}.${signature}`;
-}
-
-/*
- * Verify an existing admin session.
- */
-export async function verifyAdminSession(token) {
-  try {
-    if (!token) {
-      return false;
-    }
-
-    const parts = token.split(".");
-
-    if (parts.length !== 2) {
-      return false;
-    }
-
-    const [encodedPayload, signature] = parts;
-
-    const validSignature =
-      await verifySignature(
-        encodedPayload,
-        signature
-      );
-
-    if (!validSignature) {
-      return false;
-    }
-
-    const payload = JSON.parse(
-      base64UrlDecode(encodedPayload)
-    );
-
-    if (payload.role !== "admin") {
-      return false;
-    }
-
-    if (!payload.exp) {
-      return false;
-    }
-
-    if (Date.now() > payload.exp) {
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error(
-      "Admin session verification error:",
-      error
-    );
-
-    return false;
-  }
-}
-
-/*
- * Return the admin session cookie name.
- */
 export function getAdminCookieName() {
-  return COOKIE_NAME;
+  return ADMIN_SESSION_COOKIE;
 }
 
-/*
- * Export COOKIE_NAME as well so existing files
- * can import it directly if necessary.
- */
-export { COOKIE_NAME };
+export function getAdminFromRequest(req) {
+  try {
+    const cookieHeader = req.headers.cookie || "";
+
+    const cookies = cookieHeader
+      .split(";")
+      .map((cookie) => cookie.trim())
+      .filter(Boolean);
+
+    const adminCookie = cookies.find((cookie) =>
+      cookie.startsWith(`${ADMIN_SESSION_COOKIE}=`)
+    );
+
+    if (!adminCookie) {
+      return null;
+    }
+
+    const token = adminCookie.substring(
+      `${ADMIN_SESSION_COOKIE}=`.length
+    );
+
+    if (!token) {
+      return null;
+    }
+
+    return verifyAdminToken(token);
+  } catch (error) {
+    console.error(
+      "Unable to read admin session:",
+      error.message
+    );
+
+    return null;
+  }
+}
+
+export function isAdminRequest(req) {
+  const admin = getAdminFromRequest(req);
+
+  return Boolean(admin && admin.role === "admin");
+}
