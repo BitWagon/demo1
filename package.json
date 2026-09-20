@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cookie": "^2.0.1",
     "framer-motion": "^13.1.1",
+    "jose": "^6.2.12",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.39.0",
     "mongoose": "^8.18.0",

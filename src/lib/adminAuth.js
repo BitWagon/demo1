@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 
 const ADMIN_SESSION_COOKIE = "brand_admin_session";
+const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
-const getAdminSecret = () => {
+function getAdminSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET;
 
   if (!secret) {
@@ -12,8 +13,11 @@ const getAdminSecret = () => {
   }
 
   return secret;
-};
+}
 
+/*
+ * Create a JWT for the admin session.
+ */
 export function createAdminToken() {
   const secret = getAdminSecret();
 
@@ -28,6 +32,12 @@ export function createAdminToken() {
   );
 }
 
+/*
+ * Verify a JWT token.
+ *
+ * This function is used by API routes where
+ * jsonwebtoken is fully supported.
+ */
 export function verifyAdminToken(token) {
   if (!token) {
     return null;
@@ -36,21 +46,48 @@ export function verifyAdminToken(token) {
   try {
     const secret = getAdminSecret();
 
-    return jwt.verify(token, secret);
+    const decoded = jwt.verify(token, secret);
+
+    if (!decoded || decoded.role !== "admin") {
+      return null;
+    }
+
+    return decoded;
   } catch (error) {
-    console.error("Admin token verification failed:", error.message);
+    console.error(
+      "Admin token verification failed:",
+      error.message
+    );
 
     return null;
   }
 }
 
+/*
+ * Get the single cookie name used throughout
+ * the entire admin authentication system.
+ */
 export function getAdminCookieName() {
   return ADMIN_SESSION_COOKIE;
 }
 
+/*
+ * Get the cookie lifetime.
+ */
+export function getAdminSessionMaxAge() {
+  return ADMIN_SESSION_MAX_AGE;
+}
+
+/*
+ * Read the admin token from an API request.
+ */
 export function getAdminFromRequest(req) {
   try {
     const cookieHeader = req.headers.cookie || "";
+
+    if (!cookieHeader) {
+      return null;
+    }
 
     const cookies = cookieHeader
       .split(";")
@@ -84,8 +121,24 @@ export function getAdminFromRequest(req) {
   }
 }
 
+/*
+ * Check whether an API request belongs to an admin.
+ */
 export function isAdminRequest(req) {
   const admin = getAdminFromRequest(req);
 
   return Boolean(admin && admin.role === "admin");
+}
+
+/*
+ * Compatibility helper.
+ *
+ * Some existing backend code may call
+ * verifyAdminSession(). Keep this function
+ * available so we do not break those routes.
+ */
+export function verifyAdminSession(token) {
+  const decoded = verifyAdminToken(token);
+
+  return Boolean(decoded && decoded.role === "admin");
 }

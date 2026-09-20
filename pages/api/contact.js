@@ -1,14 +1,13 @@
 import connectDB from "@/lib/mongodb";
 import Contact from "@/models/Contact";
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { isAdminRequest } from "@/lib/adminAuth";
 
 export default async function handler(req, res) {
   /*
-   * Only POST requests are allowed.
+   * Only GET requests are allowed.
    */
-  if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
+  if (req.method !== "GET") {
+    res.setHeader("Allow", ["GET"]);
 
     return res.status(405).json({
       success: false,
@@ -18,164 +17,56 @@ export default async function handler(req, res) {
 
   try {
     /*
-     * Make sure the request body exists.
-     */
-    if (!req.body || typeof req.body !== "object") {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid request body.",
-      });
-    }
-
-    /*
-     * Get values from the frontend.
-     */
-    const {
-      name = "",
-      email = "",
-      phone = "",
-      message = "",
-    } = req.body;
-
-    /*
-     * Convert everything to strings safely.
-     */
-    const cleanName = String(name).trim();
-    const cleanEmail = String(email).trim().toLowerCase();
-    const cleanPhone = String(phone).trim();
-    const cleanMessage = String(message).trim();
-
-    /*
-     * Required fields.
-     */
-    if (!cleanName) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your full name.",
-      });
-    }
-
-    if (!cleanEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your email address.",
-      });
-    }
-
-    if (!cleanMessage) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your message.",
-      });
-    }
-
-    /*
-     * Name validation.
-     */
-    if (cleanName.length < 2) {
-      return res.status(400).json({
-        success: false,
-        message: "Your name must contain at least 2 characters.",
-      });
-    }
-
-    if (cleanName.length > 100) {
-      return res.status(400).json({
-        success: false,
-        message: "Your name is too long.",
-      });
-    }
-
-    /*
-     * Email validation.
-     */
-    if (!emailRegex.test(cleanEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address.",
-      });
-    }
-
-    if (cleanEmail.length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Your email address is too long.",
-      });
-    }
-
-    /*
-     * Phone is optional.
+     * Check the admin session.
      *
-     * We intentionally do not use a strict phone regex here.
-     * This allows common UK/international formats such as:
-     *
-     * +44 20 1234 5678
-     * +92 300 1234567
-     * 0300 1234567
-     * 020-1234-5678
+     * This prevents normal website visitors from
+     * accessing customer contact submissions.
      */
-    if (cleanPhone.length > 30) {
-      return res.status(400).json({
+    if (!isAdminRequest(req)) {
+      return res.status(401).json({
         success: false,
-        message: "Your phone number is too long.",
+        message: "Unauthorized. Admin access required.",
       });
     }
 
     /*
-     * Message validation.
-     */
-    if (cleanMessage.length < 5) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a message with at least 5 characters.",
-      });
-    }
-
-    if (cleanMessage.length > 5000) {
-      return res.status(400).json({
-        success: false,
-        message: "Your message is too long.",
-      });
-    }
-
-    /*
-     * Connect to MongoDB Atlas.
+     * Connect to MongoDB.
      */
     await connectDB();
 
     /*
-     * Save contact enquiry to MongoDB.
+     * Get all contact submissions.
+     *
+     * Newest submissions appear first.
      */
-    const contact = await Contact.create({
-      name: cleanName,
-      email: cleanEmail,
-      phone: cleanPhone,
-      message: cleanMessage,
-      status: "new",
-    });
+    const contacts = await Contact.find({})
+      .sort({ createdAt: -1 })
+      .lean();
 
     /*
-     * Successful response.
+     * Convert MongoDB documents into JSON-safe data.
      */
-    return res.status(201).json({
+    const formattedContacts = contacts.map((contact) => ({
+      id: contact._id.toString(),
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone || "",
+      message: contact.message,
+      status: contact.status || "new",
+      createdAt: contact.createdAt,
+      updatedAt: contact.updatedAt,
+    }));
+
+    return res.status(200).json({
       success: true,
-      message: "Your message has been sent successfully.",
-      contactId: contact._id.toString(),
+      count: formattedContacts.length,
+      contacts: formattedContacts,
     });
   } catch (error) {
-    /*
-     * Always log the real backend error
-     * in the terminal for debugging.
-     */
-    console.error("=================================");
-    console.error("CONTACT API ERROR");
-    console.error("Message:", error.message);
-    console.error("Name:", error.name);
-    console.error("Code:", error.code);
-    console.error("=================================");
+    console.error("ADMIN CONTACTS API ERROR:", error);
 
     /*
-     * MongoDB connection/server errors.
+     * MongoDB connection errors.
      */
     if (
       error.name === "MongooseServerSelectionError" ||
@@ -190,27 +81,12 @@ export default async function handler(req, res) {
     }
 
     /*
-     * Mongoose validation errors.
-     */
-    if (error.name === "ValidationError") {
-      const validationMessages = Object.values(error.errors)
-        .map((item) => item.message)
-        .join(", ");
-
-      return res.status(400).json({
-        success: false,
-        message:
-          validationMessages || "Please check the submitted information.",
-      });
-    }
-
-    /*
      * General server error.
      */
     return res.status(500).json({
       success: false,
       message:
-        "Unable to save your message right now. Please try again later.",
+        "Unable to load contact submissions right now.",
     });
   }
 }

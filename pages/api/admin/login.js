@@ -1,12 +1,23 @@
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
-import {
-  createAdminToken,
-  getAdminCookieName,
-} from "@/lib/adminAuth";
 
+import connectDB from "@/lib/mongodb";
+import AdminLoginPage from "@/app/admin/login/page";
+
+const ADMIN_COOKIE_NAME =
+  "brand_admin_session";
+
+const COOKIE_MAX_AGE = 60 * 60 * 24;
+
+/*
+ * Admin login API
+ *
+ * POST /api/admin/login
+ */
 export default async function handler(req, res) {
   /*
-   * Only POST requests are allowed.
+   * Only POST is allowed.
    */
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
@@ -19,128 +30,140 @@ export default async function handler(req, res) {
 
   try {
     /*
-     * Make sure the request body exists.
+     * Read login information.
      */
-    if (!req.body || typeof req.body !== "object") {
+    const { email, password } =
+      req.body || {};
+
+    /*
+     * Validate input.
+     */
+    if (
+      !email ||
+      typeof email !== "string" ||
+      !password ||
+      typeof password !== "string"
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Invalid request body.",
+        message:
+          "Email and password are required.",
       });
     }
 
     /*
-     * Read login credentials.
+     * Connect to MongoDB.
      */
-    const { email = "", password = "" } = req.body;
-
-    const cleanEmail = String(email).trim().toLowerCase();
-    const cleanPassword = String(password);
+    await connectDB();
 
     /*
-     * Get admin credentials from environment variables.
+     * Find admin by email.
      */
-    const adminEmail = String(
-      process.env.ADMIN_EMAIL || ""
-    )
-      .trim()
-      .toLowerCase();
-
-    const adminPassword = String(
-      process.env.ADMIN_PASSWORD || ""
-    );
+    const admin = await Admin.findOne({
+      email: email.trim().toLowerCase(),
+    });
 
     /*
-     * Make sure admin credentials are configured.
+     * Do not reveal whether the email
+     * exists in the database.
      */
-    if (!adminEmail || !adminPassword) {
+    if (!admin) {
+      return res.status(401).json({
+        success: false,
+        message:
+          "Invalid email or password.",
+      });
+    }
+
+    /*
+     * Compare password with stored hash.
+     */
+    const passwordMatch =
+      await bcrypt.compare(
+        password,
+        admin.password
+      );
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        success: false,
+        message:
+          "Invalid email or password.",
+      });
+    }
+
+    /*
+     * Make sure JWT secret exists.
+     */
+    if (!process.env.JWT_SECRET) {
       console.error(
-        "ADMIN_EMAIL or ADMIN_PASSWORD is missing from .env.local."
+        "ADMIN LOGIN ERROR: JWT_SECRET is missing."
       );
 
       return res.status(500).json({
         success: false,
         message:
-          "Admin authentication is not configured correctly.",
+          "Server authentication configuration is missing.",
       });
     }
 
     /*
-     * Validate submitted email.
+     * Create admin JWT.
      */
-    if (!cleanEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your email address.",
-      });
-    }
+    const token = jwt.sign(
+      {
+        adminId: admin._id.toString(),
+        email: admin.email,
+        role: "admin",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     /*
-     * Validate submitted password.
+     * Store JWT inside an HTTP-only cookie.
      */
-    if (!cleanPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your password.",
-      });
-    }
+    const cookie = serialize(
+      ADMIN_COOKIE_NAME,
+      token,
+      {
+        httpOnly: true,
+        secure:
+          process.env.NODE_ENV ===
+          "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: COOKIE_MAX_AGE,
+      }
+    );
+
+    res.setHeader(
+      "Set-Cookie",
+      cookie
+    );
 
     /*
-     * Check admin credentials.
-     */
-    if (
-      cleanEmail !== adminEmail ||
-      cleanPassword !== adminPassword
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
-      });
-    }
-
-    /*
-     * Create JWT admin session token.
-     */
-    const token = createAdminToken();
-
-    /*
-     * Get the same cookie name used by adminAuth.js.
-     */
-    const cookieName = getAdminCookieName();
-
-    /*
-     * Store JWT in a secure HTTP-only cookie.
+     * Successful login.
      *
-     * httpOnly:
-     * JavaScript in the browser cannot access the token.
-     *
-     * sameSite:
-     * Helps protect against CSRF attacks.
-     *
-     * maxAge:
-     * Seven days, matching the JWT expiration.
-     *
-     * path:
-     * Makes the cookie available throughout the website.
-     */
-    const cookie = serialize(cookieName, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-
-    res.setHeader("Set-Cookie", cookie);
-
-    /*
-     * Login successful.
+     * The frontend will automatically redirect
+     * to /admin.
      */
     return res.status(200).json({
       success: true,
       message: "Admin login successful.",
+      admin: {
+        id: admin._id.toString(),
+        email: admin.email,
+        role: "admin",
+      },
     });
   } catch (error) {
-    console.error("ADMIN LOGIN ERROR:", error);
+    console.error(
+      "ADMIN LOGIN ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,

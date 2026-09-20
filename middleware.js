@@ -1,65 +1,80 @@
 import { NextResponse } from "next/server";
 
-import {
-  verifyAdminSession,
-  getAdminCookieName,
-} from "./src/lib/adminAuth";
+const ADMIN_COOKIE_NAME =
+  "brand_admin_session";
 
-export async function middleware(request) {
+export function middleware(request) {
   const { pathname } = request.nextUrl;
 
   /*
-   * The admin login page must always be accessible
-   * without an authentication session.
+   * Read the admin session cookie only.
+   *
+   * IMPORTANT:
+   * We do NOT verify JWT here because middleware
+   * runs in the Edge runtime and jsonwebtoken uses
+   * Node.js crypto.
+   *
+   * The actual token verification is handled by
+   * the Node.js API routes.
+   */
+  const adminCookie =
+    request.cookies.get(
+      ADMIN_COOKIE_NAME
+    )?.value;
+
+  /*
+   * Admin login page.
+   *
+   * If an admin already has a session cookie,
+   * send them directly to the dashboard.
    */
   if (pathname === "/admin/login") {
+    if (adminCookie) {
+      return NextResponse.redirect(
+        new URL("/admin", request.url)
+      );
+    }
+
     return NextResponse.next();
   }
 
   /*
-   * Protect every route under /admin.
+   * Protect all other admin pages.
    */
   if (pathname.startsWith("/admin")) {
-    const cookieName = getAdminCookieName();
-
-    const sessionToken =
-      request.cookies.get(cookieName)?.value;
-
     /*
-     * Verify the admin session.
+     * No admin cookie means the user is not logged in.
      */
-    const isValidSession =
-      await verifyAdminSession(sessionToken);
-
-    /*
-     * If the session is missing or invalid,
-     * redirect the user to the login page.
-     */
-    if (!isValidSession) {
+    if (!adminCookie) {
       const loginUrl = new URL(
         "/admin/login",
         request.url
       );
 
-      return NextResponse.redirect(loginUrl);
+      loginUrl.searchParams.set(
+        "redirect",
+        pathname
+      );
+
+      return NextResponse.redirect(
+        loginUrl
+      );
     }
 
     /*
-     * Valid admin session.
-     * Allow the request to continue.
+     * Cookie exists.
+     *
+     * Let the request continue.
+     *
+     * The API/server-side authentication layer
+     * will verify the actual JWT.
      */
     return NextResponse.next();
   }
 
-  /*
-   * Allow all non-admin routes normally.
-   */
   return NextResponse.next();
 }
 
-/*
- * Run middleware only for admin routes.
- */
 export const config = {
   matcher: ["/admin/:path*"],
 };
