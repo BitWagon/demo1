@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
@@ -318,6 +319,7 @@ export default function AdminPage() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
             <StatCard
+              href="/admin/contacts"
               title="Total Contacts"
               value={
                 statistics.totalContacts ??
@@ -327,6 +329,7 @@ export default function AdminPage() {
             />
 
             <StatCard
+              href="/admin/quotes"
               title="Total Quotes"
               value={
                 statistics.totalQuotes ??
@@ -336,6 +339,7 @@ export default function AdminPage() {
             />
 
             <StatCard
+              href="/admin/newsletter"
               title="Subscribers"
               value={
                 statistics.totalSubscribers ??
@@ -345,6 +349,7 @@ export default function AdminPage() {
             />
 
             <StatCard
+              href="/admin/contacts"
               title="New Enquiries"
               value={
                 statistics.newEnquiries ??
@@ -612,18 +617,21 @@ export default function AdminPage() {
  */
 
 function StatCard({
+  href,
   title,
   value,
   icon: Icon,
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
+    <Link
+      href={href}
+      className="group block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    >
       <div className="flex items-start justify-between">
 
         <div>
 
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-slate-500 group-hover:text-blue-600">
             {title}
           </p>
 
@@ -633,13 +641,12 @@ function StatCard({
 
         </div>
 
-        <div className="rounded-xl bg-slate-100 p-3">
-          <Icon className="h-5 w-5 text-slate-700" />
+        <div className="rounded-xl bg-slate-100 p-3 transition group-hover:bg-blue-50">
+          <Icon className="h-5 w-5 text-slate-700 group-hover:text-blue-600" />
         </div>
 
       </div>
-
-    </div>
+    </Link>
   );
 }
 
