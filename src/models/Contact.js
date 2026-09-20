@@ -53,7 +53,7 @@ const ContactSchema = new mongoose.Schema(
 
 /*
  * Prevent Mongoose from creating the model again
- * during Next.js development/hot reload.
+ * during Next.js development / hot reload.
  */
 const Contact =
   mongoose.models.Contact ||

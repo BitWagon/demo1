@@ -1,24 +1,10 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { serialize } from "cookie";
+import {
+  createAdminToken,
+  getAdminCookieName,
+  getAdminSessionMaxAge,
+} from "@/lib/adminAuth";
 
-import connectDB from "@/lib/mongodb";
-import AdminLoginPage from "@/app/admin/login/page";
-
-const ADMIN_COOKIE_NAME =
-  "brand_admin_session";
-
-const COOKIE_MAX_AGE = 60 * 60 * 24;
-
-/*
- * Admin login API
- *
- * POST /api/admin/login
- */
 export default async function handler(req, res) {
-  /*
-   * Only POST is allowed.
-   */
   if (req.method !== "POST") {
     res.setHeader("Allow", ["POST"]);
 
@@ -29,135 +15,91 @@ export default async function handler(req, res) {
   }
 
   try {
-    /*
-     * Read login information.
-     */
-    const { email, password } =
+    const { email = "", password = "" } =
       req.body || {};
 
-    /*
-     * Validate input.
-     */
-    if (
-      !email ||
-      typeof email !== "string" ||
-      !password ||
-      typeof password !== "string"
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Email and password are required.",
-      });
-    }
+    const cleanEmail = String(email)
+      .trim()
+      .toLowerCase();
+
+    const cleanPassword = String(password);
+
+    const adminEmail = String(
+      process.env.ADMIN_EMAIL || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    const adminPassword = String(
+      process.env.ADMIN_PASSWORD || ""
+    );
 
     /*
-     * Connect to MongoDB.
+     * Make sure admin credentials exist.
      */
-    await connectDB();
-
-    /*
-     * Find admin by email.
-     */
-    const admin = await Admin.findOne({
-      email: email.trim().toLowerCase(),
-    });
-
-    /*
-     * Do not reveal whether the email
-     * exists in the database.
-     */
-    if (!admin) {
-      return res.status(401).json({
-        success: false,
-        message:
-          "Invalid email or password.",
-      });
-    }
-
-    /*
-     * Compare password with stored hash.
-     */
-    const passwordMatch =
-      await bcrypt.compare(
-        password,
-        admin.password
-      );
-
-    if (!passwordMatch) {
-      return res.status(401).json({
-        success: false,
-        message:
-          "Invalid email or password.",
-      });
-    }
-
-    /*
-     * Make sure JWT secret exists.
-     */
-    if (!process.env.JWT_SECRET) {
+    if (!adminEmail || !adminPassword) {
       console.error(
-        "ADMIN LOGIN ERROR: JWT_SECRET is missing."
+        "ADMIN LOGIN ERROR: ADMIN_EMAIL or ADMIN_PASSWORD is missing from .env.local."
       );
 
       return res.status(500).json({
         success: false,
         message:
-          "Server authentication configuration is missing.",
+          "Admin authentication is not configured correctly.",
       });
     }
 
     /*
-     * Create admin JWT.
+     * Validate submitted credentials.
      */
-    const token = jwt.sign(
-      {
-        adminId: admin._id.toString(),
-        email: admin.email,
-        role: "admin",
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
+    if (!cleanEmail || !cleanPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required.",
+      });
+    }
 
     /*
-     * Store JWT inside an HTTP-only cookie.
+     * Check credentials.
      */
-    const cookie = serialize(
-      ADMIN_COOKIE_NAME,
-      token,
-      {
-        httpOnly: true,
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: COOKIE_MAX_AGE,
-      }
-    );
+    if (
+      cleanEmail !== adminEmail ||
+      cleanPassword !== adminPassword
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
 
+    /*
+     * Create the same admin JWT used by
+     * adminAuth.js.
+     */
+    const token = createAdminToken();
+
+    const cookieName = getAdminCookieName();
+    const maxAge = getAdminSessionMaxAge();
+
+    /*
+     * Set the HTTP-only admin session cookie.
+     *
+     * No cookie npm package is required.
+     */
     res.setHeader(
       "Set-Cookie",
-      cookie
+      `${cookieName}=${encodeURIComponent(
+        token
+      )}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Lax${
+        process.env.NODE_ENV === "production"
+          ? "; Secure"
+          : ""
+      }`
     );
 
-    /*
-     * Successful login.
-     *
-     * The frontend will automatically redirect
-     * to /admin.
-     */
     return res.status(200).json({
       success: true,
       message: "Admin login successful.",
-      admin: {
-        id: admin._id.toString(),
-        email: admin.email,
-        role: "admin",
-      },
     });
   } catch (error) {
     console.error(
