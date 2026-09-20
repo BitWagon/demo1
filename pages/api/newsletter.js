@@ -1,184 +1,142 @@
+import mongoose from "mongoose";
 import connectDB from "@/lib/mongodb";
 import Newsletter from "@/models/Newsletter";
+import { isAdminRequest } from "@/lib/adminAuth";
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export default async function handler(req, res) {
-  /*
-   * Only POST requests are allowed.
-   */
-  if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
-
-    return res.status(405).json({
-      success: false,
-      message: "Method not allowed.",
-    });
-  }
-
   try {
-    /*
-     * Validate request body.
-     */
-    if (!req.body || typeof req.body !== "object") {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid request body.",
-      });
-    }
-
-    /*
-     * Get email from the newsletter form.
-     */
-    const { email = "" } = req.body;
-
-    /*
-     * Clean the email address.
-     */
-    const cleanEmail = String(email).trim().toLowerCase();
-
-    /*
-     * Required email validation.
-     */
-    if (!cleanEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your email address.",
-      });
-    }
-
-    /*
-     * Email format validation.
-     */
-    if (!emailRegex.test(cleanEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address.",
-      });
-    }
-
-    /*
-     * Maximum email length.
-     */
-    if (cleanEmail.length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Your email address is too long.",
-      });
-    }
-
-    /*
-     * Connect to MongoDB Atlas.
-     */
     await connectDB();
 
-    /*
-     * Check whether the email already exists.
-     */
-    const existingSubscriber = await Newsletter.findOne({
-      email: cleanEmail,
-    });
+    // ----------------------------------------
+    // POST - Public newsletter subscription
+    // ----------------------------------------
+    if (req.method === "POST") {
+      const email = normalizeEmail(req.body?.email);
 
-    /*
-     * If already subscribed, don't create another document.
-     */
-    if (existingSubscriber) {
-      /*
-       * If the subscriber previously unsubscribed,
-       * subscribe them again.
-       */
-      if (existingSubscriber.status === "unsubscribed") {
-        existingSubscriber.status = "subscribed";
-        await existingSubscriber.save();
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "Email is required.",
+        });
+      }
 
+      if (!isValidEmail(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid email address.",
+        });
+      }
+
+      const existingSubscriber =
+        await Newsletter.findOne({ email });
+
+      if (existingSubscriber) {
         return res.status(200).json({
           success: true,
-          message: "You have been subscribed to our newsletter again.",
+          message: "This email is already subscribed.",
+          subscriber: {
+            id: existingSubscriber._id.toString(),
+            email: existingSubscriber.email,
+          },
+        });
+      }
+
+      const subscriber = await Newsletter.create({
+        email,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Successfully subscribed.",
+        subscriber: {
+          id: subscriber._id.toString(),
+          email: subscriber.email,
+        },
+      });
+    }
+
+    // ----------------------------------------
+    // Admin authentication
+    // ----------------------------------------
+    const adminRequest = isAdminRequest(req);
+
+    if (!adminRequest) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    // ----------------------------------------
+    // GET - Admin newsletter subscribers
+    // ----------------------------------------
+    if (req.method === "GET") {
+      const subscribers = await Newsletter.find({})
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return res.status(200).json({
+        success: true,
+        count: subscribers.length,
+        subscribers: subscribers.map((subscriber) => ({
+          id: subscriber._id.toString(),
+          email: subscriber.email,
+          createdAt: subscriber.createdAt,
+          updatedAt: subscriber.updatedAt,
+        })),
+      });
+    }
+
+    // ----------------------------------------
+    // DELETE - Admin delete subscriber
+    // ----------------------------------------
+    if (req.method === "DELETE") {
+      const { id } = req.query;
+
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "A valid subscriber ID is required.",
+        });
+      }
+
+      const subscriber =
+        await Newsletter.findByIdAndDelete(id);
+
+      if (!subscriber) {
+        return res.status(404).json({
+          success: false,
+          message: "Subscriber not found.",
         });
       }
 
       return res.status(200).json({
         success: true,
-        message: "This email is already subscribed to our newsletter.",
+        message: "Subscriber deleted successfully.",
       });
     }
 
-    /*
-     * Create a new newsletter subscriber.
-     */
-    await Newsletter.create({
-      email: cleanEmail,
-      status: "subscribed",
-    });
-
-    /*
-     * Successful response.
-     */
-    return res.status(201).json({
-      success: true,
-      message: "You have successfully subscribed to our newsletter.",
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed.",
     });
   } catch (error) {
-    /*
-     * Log the complete backend error.
-     */
-    console.error("=================================");
-    console.error("NEWSLETTER API ERROR");
-    console.error("Message:", error.message);
-    console.error("Name:", error.name);
-    console.error("Code:", error.code);
-    console.error("=================================");
+    console.error(
+      "NEWSLETTER API ERROR:",
+      error
+    );
 
-    /*
-     * MongoDB connection errors.
-     */
-    if (
-      error.name === "MongooseServerSelectionError" ||
-      error.name === "MongoServerSelectionError" ||
-      error.name === "MongoNetworkError"
-    ) {
-      return res.status(503).json({
-        success: false,
-        message:
-          "Database connection failed. Please check your MongoDB Atlas connection.",
-      });
-    }
-
-    /*
-     * Duplicate email protection.
-     *
-     * This also protects against a race condition where
-     * two requests arrive at nearly the same time.
-     */
-    if (error.code === 11000) {
-      return res.status(200).json({
-        success: true,
-        message: "This email is already subscribed to our newsletter.",
-      });
-    }
-
-    /*
-     * Mongoose validation errors.
-     */
-    if (error.name === "ValidationError") {
-      const validationMessages = Object.values(error.errors)
-        .map((item) => item.message)
-        .join(", ");
-
-      return res.status(400).json({
-        success: false,
-        message:
-          validationMessages || "Please check the submitted information.",
-      });
-    }
-
-    /*
-     * General server error.
-     */
     return res.status(500).json({
       success: false,
-      message:
-        "Unable to subscribe right now. Please try again later.",
+      message: "Something went wrong.",
     });
   }
 }
